@@ -1,0 +1,1276 @@
+{
+	"info": {
+		"_postman_id": "33cffc1e-30d0-4e6b-a715-86ceb11b5673",
+		"name": "Business Verification",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Business Registration (FALSE)",
+			"item": [
+				{
+					"name": "1. Request verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "23bb9146-b7f9-4b7f-be83-5407e63ec428",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"postman+{{$timestamp}}@evidentid.com\",\n    \"summary\": \"Business Registration Test\",\n    \"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n    \"userAuthenticationType\": \"blindtrust\",\n    \"attributesRequested\": [\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.business_name\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.date_of_incorporation\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.federal_employer_identification_number\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.filing_number\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.mailing_address\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.officer_name\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.officer_title\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.registered_address\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.registered_agent\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.registration_status\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.registration_type\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.state\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.state_of_incorporation\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.years_in_business\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e334590d-af05-4469-9579-7b69294acb89",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "1ccb69c0-d758-46af-ac54-ab84568e0d3b",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"inputs\": [\n    {\n      \"type\": \"business.name\",\n      \"value\": \"Yosemite View Lodge\"\n    },\n    {\n      \"type\": \"business.full_address\",\n      \"value\": {\n        \"$objectType\": \"Address\",\n        \"city\": \"El Portal\",\n        \"country\": \"US\",\n        \"postal_code\": \"95318\",\n        \"state\": \"CA\",\n        \"street_name\": \"CA-140\",\n        \"street_number\": \"11136\"\n      }\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "bbb56ede-5748-40a5-b0fb-e2844cb448e1",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Business Registration (TRUE)",
+			"item": [
+				{
+					"name": "1. Request verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "23bb9146-b7f9-4b7f-be83-5407e63ec428",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"postman+{{$timestamp}}@evidentid.com\",\n    \"summary\": \"Business Registration Test\",\n    \"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n    \"userAuthenticationType\": \"blindtrust\",\n    \"attributesRequested\": [\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.business_name\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.date_of_incorporation\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.federal_employer_identification_number\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.filing_number\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.mailing_address\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.officer_name\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.officer_title\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.registered_address\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.registered_agent\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.registration_status\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.registration_type\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.state\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.state_of_incorporation\"\n        },\n        {\n            \"attributeType\": \"credentialing.business.registration.us.ca.years_in_business\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e334590d-af05-4469-9579-7b69294acb89",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "1ccb69c0-d758-46af-ac54-ab84568e0d3b",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"inputs\": [\n    {\n      \"type\": \"business.name\",\n      \"value\": \"833 Dump Pro LLC\"\n    },\n    {\n      \"type\": \"business.full_address\",\n      \"value\": {\n        \"$objectType\": \"Address\",\n        \"city\": \"San Jose\",\n        \"country\": \"US\",\n        \"postal_code\": \"95127\",\n        \"state\": \"CA\",\n        \"street_name\": \"S White Rd\",\n        \"street_number\": \"1051\"\n      }\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "bbb56ede-5748-40a5-b0fb-e2844cb448e1",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Business Identity (HIGH)",
+			"item": [
+				{
+					"name": "1. Request verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "23bb9146-b7f9-4b7f-be83-5407e63ec428",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"postman+{{$timestamp}}@evidentid.com\",\n    \"summary\": \"Business Identity Test\",\n    \"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n    \"userAuthenticationType\": \"blindtrust\",\n    \"attributesRequested\": [\n        {\n            \"attributeType\": \"business.identity.confidence_score\"\n        },\n        {\n            \"attributeType\": \"business.identity.confidence_level\"\n        },\n        {\n            \"attributeType\": \"business.identity.identified_business_name\"\n        },\n        {\n            \"attributeType\": \"business.identity.legal_business_name\"\n        },\n        {\n            \"attributeType\": \"business.identity.doing_business_as\"\n        },\n        {\n            \"attributeType\": \"business.identity.identified_business_address\"\n        },\n        {\n            \"attributeType\": \"business.identity.tax_id\"\n        },\n        {\n            \"attributeType\": \"business.identity.domain\"\n        },\n        {\n            \"attributeType\": \"business.identity.sic_codes\"\n        },\n        {\n            \"attributeType\": \"business.identity.naics_codes\"\n        },\n        {\n            \"attributeType\": \"business.identity.date_of_incorporation\"\n        },\n        {\n            \"attributeType\": \"business.identity.years_in_business\"\n        },\n        {\n            \"attributeType\": \"business.identity.state_of_incorporation\"\n        },\n        {\n            \"attributeType\": \"business.identity.corporate_structure\"\n        },\n        {\n            \"attributeType\": \"business.identity.number_of_employees\"\n        },\n        {\n            \"attributeType\": \"business.identity.executives\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e334590d-af05-4469-9579-7b69294acb89",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"inputs\": [\n    {\n      \"type\": \"business.name\",\n      \"value\": \"Mary Mac's Tea\"\n    },\n    {\n      \"type\": \"business.full_address\",\n      \"value\": {\n        \"$objectType\": \"Address\",\n        \"city\": \"Atlanta\",\n        \"country\": \"US\",\n        \"postal_code\": \"30308\",\n        \"state\": \"GA\",\n        \"street_name\": \"Ponce De Leon Ave NE\",\n        \"street_number\": \"224\"\n      }\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "bbb56ede-5748-40a5-b0fb-e2844cb448e1",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "05c99dba-27db-4389-9f47-84e76df6108e",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b95d62ad-5894-442e-a8fa-58779ad7d296",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Business Identity (LOW - Incorrect Address)",
+			"item": [
+				{
+					"name": "1. Request verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "23bb9146-b7f9-4b7f-be83-5407e63ec428",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"postman+{{$timestamp}}@evidentid.com\",\n    \"summary\": \"Business Identity Test\",\n    \"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n    \"userAuthenticationType\": \"blindtrust\",\n    \"attributesRequested\": [\n        {\n            \"attributeType\": \"business.identity.confidence_score\"\n        },\n        {\n            \"attributeType\": \"business.identity.confidence_level\"\n        },\n        {\n            \"attributeType\": \"business.identity.identified_business_name\"\n        },\n        {\n            \"attributeType\": \"business.identity.legal_business_name\"\n        },\n        {\n            \"attributeType\": \"business.identity.doing_business_as\"\n        },\n        {\n            \"attributeType\": \"business.identity.identified_business_address\"\n        },\n        {\n            \"attributeType\": \"business.identity.tax_id\"\n        },\n        {\n            \"attributeType\": \"business.identity.domain\"\n        },\n        {\n            \"attributeType\": \"business.identity.sic_codes\"\n        },\n        {\n            \"attributeType\": \"business.identity.naics_codes\"\n        },\n        {\n            \"attributeType\": \"business.identity.date_of_incorporation\"\n        },\n        {\n            \"attributeType\": \"business.identity.years_in_business\"\n        },\n        {\n            \"attributeType\": \"business.identity.state_of_incorporation\"\n        },\n        {\n            \"attributeType\": \"business.identity.corporate_structure\"\n        },\n        {\n            \"attributeType\": \"business.identity.number_of_employees\"\n        },\n        {\n            \"attributeType\": \"business.identity.executives\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e334590d-af05-4469-9579-7b69294acb89",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"inputs\": [\n    {\n      \"type\": \"business.name\",\n      \"value\": \"Xtrodinary Movers\"\n    },\n    {\n      \"type\": \"business.full_address\",\n      \"value\": {\n        \"$objectType\": \"Address\",\n        \"city\": \"Fort Lauderdale\",\n        \"country\": \"FL\",\n        \"postal_code\": \"33311\",\n        \"state\": \"FL\",\n        \"street_name\": \"W Commercial Blvd Tamarac Fl 33319\",\n        \"street_number\": \"6435\"\n      }\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "bbb56ede-5748-40a5-b0fb-e2844cb448e1",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "05c99dba-27db-4389-9f47-84e76df6108e",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b95d62ad-5894-442e-a8fa-58779ad7d296",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Business Relationships (FOUND)",
+			"item": [
+				{
+					"name": "1. Request verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "23bb9146-b7f9-4b7f-be83-5407e63ec428",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"postman+{{$timestamp}}@evidentid.com\",\n    \"summary\": \"Business Relationships Test\",\n    \"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n    \"userAuthenticationType\": \"blindtrust\",\n    \"attributesRequested\": [\n        {\n            \"attributeType\": \"business.relationships.confidence_score\"\n        },\n        {\n            \"attributeType\": \"business.relationships.confidence_level\"\n        },\n        {\n            \"attributeType\": \"business.relationships.associated_businesses\"\n        },\n        {\n            \"attributeType\": \"business.relationships.associated_persons\"\n        },\n        {\n            \"attributeType\": \"business.relationships.owners_individual\"\n        },\n        {\n            \"attributeType\": \"business.relationships.owners_business\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e334590d-af05-4469-9579-7b69294acb89",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"inputs\": [\n    {\n      \"type\": \"business.name\",\n      \"value\": \"Elite Rooter Phoenix\"\n    },\n    {\n      \"type\": \"business.full_address\",\n      \"value\": {\n        \"$objectType\": \"Address\",\n        \"city\": \"Tempe\",\n        \"country\": \"US\",\n        \"postal_code\": \"85282\",\n        \"state\": \"AZ\",\n        \"street_name\": \"S Ash Avenue\",\n        \"street_number\": \"5020\",\n        \"street_unit\": \"105\"\n        \n      }\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "bbb56ede-5748-40a5-b0fb-e2844cb448e1",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "05c99dba-27db-4389-9f47-84e76df6108e",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b95d62ad-5894-442e-a8fa-58779ad7d296",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Business Risk Signals (TRUE)",
+			"item": [
+				{
+					"name": "1. Request verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "23bb9146-b7f9-4b7f-be83-5407e63ec428",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"postman+{{$timestamp}}@evidentid.com\",\n    \"summary\": \"Business Risk Signals Test\",\n    \"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n    \"userAuthenticationType\": \"blindtrust\",\n    \"attributesRequested\": [\n        {\n            \"attributeType\": \"business.risk_signals.confidence_score\"\n        },\n        {\n            \"attributeType\": \"business.risk_signals.confidence_level\"\n        },\n        {\n            \"attributeType\": \"business.risk_signals.active_business_status\"\n        },\n        {\n            \"attributeType\": \"business.risk_signals.risk_conditions_status\"\n        },\n        {\n            \"attributeType\": \"business.risk_signals.risk_conditions_details\"\n        },\n        {\n            \"attributeType\": \"business.risk_signals.count_of_bankruptcies\"\n        },\n        {\n            \"attributeType\": \"business.risk_signals.count_of_tax_liens\"\n        },\n        {\n            \"attributeType\": \"business.risk_signals.count_of_judgements\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e334590d-af05-4469-9579-7b69294acb89",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"inputs\": [\n    {\n      \"type\": \"business.name\",\n      \"value\": \"Integrity Contracting\"\n    },\n    {\n      \"type\": \"business.full_address\",\n      \"value\": {\n        \"$objectType\": \"Address\",\n        \"city\": \"Charlotte\",\n        \"country\": \"US\",\n        \"postal_code\": \"28227\",\n        \"state\": \"NC\",\n        \"street_name\": \"Arrow Lane\",\n        \"street_number\": \"3434\"\n      }\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "bbb56ede-5748-40a5-b0fb-e2844cb448e1",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "05c99dba-27db-4389-9f47-84e76df6108e",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b95d62ad-5894-442e-a8fa-58779ad7d296",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

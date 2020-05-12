@@ -1,0 +1,1019 @@
+{
+	"info": {
+		"_postman_id": "42a0b0cc-6004-482b-8592-8ba267865dec",
+		"name": "Healthcare Licenses",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Advanced Practice Registered Nurse (VALID)",
+			"item": [
+				{
+					"name": "1. Request license verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "23bb9146-b7f9-4b7f-be83-5407e63ec428",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"postman+{{$timestamp}}@evidentid.com\",\n\t\"summary\": \"Advanced Practice Registered Nurse License Verification Test\",\n\t\"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n\t\"userAuthenticationType\": \"blindtrust\",\n\t\"attributesRequested\": [\n\t\t{\n\t\t\t\"attributeType\": \"credentialing.license.professional.us.healthcare.nurse.advanced_practice_registered_nurse.licenses_list\"\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit license on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e334590d-af05-4469-9579-7b69294acb89",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"inputs\": [\n\t\t{\n\t\t\t\"type\": \"core.fullname\",\n\t\t\t\"value\": \n\t\t\t{\n\t\t\t\t\"$objectType\": \"Name\",\n\t\t\t\t\"first\": \"TestLicense\",\n\t\t\t\t\"last\": \"M\",\n\t\t\t\t\"middle\": \"Smith\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"credentialing.license.professional.us.healthcare.nurse.advanced_practice_registered_nurse.input_licenses_list\",\n\t\t\t\"value\": {\n\t\t\t\t\"$objectType\": \"usAdvancedPracticeRegisteredNurseLicenseList\",\n\t\t\t\t\"licenses\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"XY1234567\",\n\t\t\t\t\t\t\"licenseState\": \"MO\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"4321AB\",\n\t\t\t\t\t\t\"licenseState\": \"IL\"\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "bbb56ede-5748-40a5-b0fb-e2844cb448e1",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9852baff-582b-45c7-aeaf-015d54285614",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "dde57c94-30f3-4f36-a8f8-29c474b79b43",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Certified Nursing Assistant (VALID)",
+			"item": [
+				{
+					"name": "1. Request license verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "146e0058-203a-43f1-aad4-f7a1bf79bdf5",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"postman+{{$timestamp}}@evidentid.com\",\n\t\"summary\": \"Certified Nursing Assistant License Verification Test\",\n\t\"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n\t\"userAuthenticationType\": \"blindtrust\",\n\t\"attributesRequested\": [\n\t\t{\n\t\t\t\"attributeType\": \"credentialing.license.professional.us.healthcare.nurse.certified_nursing_assistant.licenses_list\"\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit license on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "01d18a23-abe4-4ac8-a895-7f796c86226e",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"inputs\": [\n\t\t{\n\t\t\t\"type\": \"core.fullname\",\n\t\t\t\"value\": \n\t\t\t{\n\t\t\t\t\"$objectType\": \"Name\",\n\t\t\t\t\"first\": \"TestLicense\",\n\t\t\t\t\"last\": \"M\",\n\t\t\t\t\"middle\": \"Smith\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"credentialing.license.professional.us.healthcare.nurse.certified_nursing_assistant.input_licenses_list\",\n\t\t\t\"value\": {\n\t\t\t\t\"$objectType\": \"usCertifiedNursingAssistantLicenseList\",\n\t\t\t\t\"licenses\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"XY1234567\",\n\t\t\t\t\t\t\"licenseState\": \"MO\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"4321AB\",\n\t\t\t\t\t\t\"licenseState\": \"IL\"\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "7b12d998-52b4-4ff4-a586-428378feeaa6",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Licensed Practical Nurse (VALID)",
+			"item": [
+				{
+					"name": "1. Request license verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e272989d-8f40-45ae-8af8-b5f5975c7f05",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"postman+{{$timestamp}}@evidentid.com\",\n\t\"summary\": \"Licensed Practical Nurse License Verification Test\",\n\t\"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n\t\"userAuthenticationType\": \"blindtrust\",\n\t\"attributesRequested\": [\n\t\t{\n\t\t\t\"attributeType\": \"credentialing.license.professional.us.healthcare.nurse.licensed_practical_nurse.licenses_list\"\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit license on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "1ff4533e-c7f1-4894-b8ee-8e85a73383dd",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"inputs\": [\n\t\t{\n\t\t\t\"type\": \"core.fullname\",\n\t\t\t\"value\": \n\t\t\t{\n\t\t\t\t\"$objectType\": \"Name\",\n\t\t\t\t\"first\": \"TestLicense\",\n\t\t\t\t\"last\": \"M\",\n\t\t\t\t\"middle\": \"Smith\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"credentialing.license.professional.us.healthcare.nurse.licensed_practical_nurse.input_licenses_list\",\n\t\t\t\"value\": {\n\t\t\t\t\"$objectType\": \"usLicensedPracticalNurseLicenseList\",\n\t\t\t\t\"licenses\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"XY1234567\",\n\t\t\t\t\t\t\"licenseState\": \"MO\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"4321AB\",\n\t\t\t\t\t\t\"licenseState\": \"IL\"\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "bea51886-0250-40c6-a5b0-67e21513b165",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Massage Therapist (VALID)",
+			"item": [
+				{
+					"name": "1. Request license verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f553f163-fa65-49a9-a108-1d5bd12ba2c7",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"postman+{{$timestamp}}@evidentid.com\",\n\t\"summary\": \"Massage therapist license verification test\",\n\t\"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n\t\"userAuthenticationType\": \"blindtrust\",\n\t\"attributesRequested\": [\n\t\t{\n\t\t\t\"attributeType\": \"credentialing.license.professional.us.healthcare.massage_therapist.licenses_list\"\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit massage license on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "b2687777-866e-4a35-afb6-d651c18cd092",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"inputs\": [\n\t\t{\n\t\t\t\"type\": \"core.fullname\",\n\t\t\t\"value\": \n\t\t\t{\n\t\t\t\t\"$objectType\": \"Name\",\n\t\t\t\t\"first\": \"TestLicense\",\n\t\t\t\t\"last\": \"M\",\n\t\t\t\t\"middle\": \"Smith\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"credentialing.license.professional.us.healthcare.massage_therapist.input_licenses_list\",\n\t\t\t\"value\": \n\t\t\t{\n\t\t\t\t\"$objectType\": \"usMassageTherapistLicenseList\",\n\t\t\t\t\"licenses\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"XY1234567\",\n\t\t\t\t\t\t\"licenseState\": \"MO\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"4321AB\",\n\t\t\t\t\t\t\"licenseState\": \"IL\"\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "9de3d564-4d3a-44a8-8c87-d152f1ef7bf8",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Registered Nurse (VALID)",
+			"item": [
+				{
+					"name": "1. Request license verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "fe7d0b63-6079-4a61-b415-00e103565689",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"postman+{{$timestamp}}@evidentid.com\",\n\t\"summary\": \"Registered Nurse License Verification Test\",\n\t\"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n\t\"userAuthenticationType\": \"blindtrust\",\n\t\"attributesRequested\": [\n\t\t{\n\t\t\t\"attributeType\": \"credentialing.license.professional.us.healthcare.nurse.registered_nurse.licenses_list\"\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit license on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "9cb5f054-7a27-4b25-b83b-466d99adf298",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"inputs\": [\n\t\t{\n\t\t\t\"type\": \"core.fullname\",\n\t\t\t\"value\": \n\t\t\t{\n\t\t\t\t\"$objectType\": \"Name\",\n\t\t\t\t\"first\": \"TestLicense\",\n\t\t\t\t\"last\": \"M\",\n\t\t\t\t\"middle\": \"Smith\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"credentialing.license.professional.us.healthcare.nurse.registered_nurse.input_licenses_list\",\n\t\t\t\"value\": {\n\t\t\t\t\"$objectType\": \"usRegisteredNurseLicenseList\",\n\t\t\t\t\"licenses\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"XY1234567\",\n\t\t\t\t\t\t\"licenseState\": \"MO\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"4321AB\",\n\t\t\t\t\t\t\"licenseState\": \"IL\"\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "6c0d6459-9cc1-4db5-985f-b48d4b08d1f8",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "729c822e-4f41-43a9-b7b0-d36ceef61a16",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "c53989ab-a40f-4f80-b839-b1e28cf4cbb6",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

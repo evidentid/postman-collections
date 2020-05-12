@@ -1,0 +1,589 @@
+{
+	"info": {
+		"_postman_id": "25c6795c-de5d-4d41-9a19-20bf58599190",
+		"name": "Background Checks",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Standard Basic",
+			"item": [
+				{
+					"name": "1. Request verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "23bb9146-b7f9-4b7f-be83-5407e63ec428",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"postman+{{$timestamp}}@evidentid.com\",\n\t\"summary\": \"Basic Background Check Test\",\n\t\"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n\t\"userAuthenticationType\": \"blindtrust\",\n\t\"attributesRequested\": [\n\t\t{\n\t\t\t\"attributeType\": \"background.criminal.profile.standard_basic\"\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e334590d-af05-4469-9579-7b69294acb89",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"inputs\": [\n  \t{\n      \"type\": \"consent.fcra.authorized\",\n      \"value\": true\n    },\n    {\n      \"type\": \"consent.fcra.requested_free_copy_state\",\n      \"value\": true\n    },\n    {\n      \"type\": \"consent.fcra.reviewed_disclosure\",\n      \"value\": true\n    },\n    {\n      \"type\": \"core.ssn\",\n      \"value\": \"123456789\"\n    },\n    {\n      \"type\": \"core.dateofbirth\",\n      \"value\": {\n        \"$objectType\": \"date\",\n        \"year\": \"1970\",\n        \"day\": \"01\",\n        \"month\": \"01\"\n      }\n    },\n    {\n      \"type\": \"core.fullname\",\n      \"value\": {\n        \"$objectType\": \"Name\",\n\t\t\"prefix\": null,\n        \"first\": \"Joe\",\n        \"middle\": null,\n        \"last\": \"Tester\",\n        \"suffix\": null\n      }\n    },\n    {\n      \"type\": \"identity_assurance.document_verification.americas.us.document_type\",\n      \"value\": {\n        \"country\": \"US\",\n        \"id_type\": \"drivers_license\"\n      }\n    },\n    {\n      \"type\": \"identity_assurance.document_verification.americas.us.drivers_license.image.back\",\n      \"value\": {\n        \"$objectType\": \"BinaryData\",\n        \"data\": \"iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7AQMAAABuCW08AAAABlBMVEUAAAD///+l2Z/dAAAAAnRSTlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAFwSURBVEiJ1dUxbsQgEAXQQRTu7AsgcQ06rmQuYK8vsL4SHddA8gVwR2Ht5DvyJqsUYSKlSJC1sl4B4xlmlvjLov8MhWjyufekIikZ7HyMzu6J5oR3GUQzEd89hURBDKM7QuT1JzAnoo6UHPgICYnIL6E3APkIyZzPZ4Ia8L7szdH8WoZvoZChzswRidxWGXC1xWfy25pykMEeMznLcXu4PAgh8YPwim0OJYRIk8Ov3lmzENLGiXrcO7rK0AROZkCJ4lacGaSgb53pPc7MSgalM4HtHnGmXWTA5/XhW0c9PTdtwV4JDcQVWb++tg3RrmcrMCqsZFDo6M+s04B4ZYDa3r1Gm9Iz0jZUM+LAtO3p2qMNaVuSXqJe6/NKNQF9gG7gPJJeZIBVOmQdYZogg7Ozq8XHqWSUDDA/JkwpDINrDwFgsJ2H2/IRugRwfdwxehrk4DPG5xKZhYBZyHqpZ3lnGSAfZ9arRkOsMviNv7W/AW90z2DjkNY2nAAAAABJRU5ErkJggg==\",\n        \"metadata\": {\n          \"cropped\": false\n        },\n        \"mime_type\": \"image/png\"\n      }\n    },\n    {\n      \"type\": \"identity_assurance.document_verification.americas.us.drivers_license.image.front\",\n      \"value\": {\n        \"$objectType\": \"BinaryData\",\n        \"data\": \"iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7AQMAAABuCW08AAAABlBMVEUAAAD///+l2Z/dAAAAAnRSTlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAFwSURBVEiJ1dUxbsQgEAXQQRTu7AsgcQ06rmQuYK8vsL4SHddA8gVwR2Ht5DvyJqsUYSKlSJC1sl4B4xlmlvjLov8MhWjyufekIikZ7HyMzu6J5oR3GUQzEd89hURBDKM7QuT1JzAnoo6UHPgICYnIL6E3APkIyZzPZ4Ia8L7szdH8WoZvoZChzswRidxWGXC1xWfy25pykMEeMznLcXu4PAgh8YPwim0OJYRIk8Ov3lmzENLGiXrcO7rK0AROZkCJ4lacGaSgb53pPc7MSgalM4HtHnGmXWTA5/XhW0c9PTdtwV4JDcQVWb++tg3RrmcrMCqsZFDo6M+s04B4ZYDa3r1Gm9Iz0jZUM+LAtO3p2qMNaVuSXqJe6/NKNQF9gG7gPJJeZIBVOmQdYZogg7Ozq8XHqWSUDDA/JkwpDINrDwFgsJ2H2/IRugRwfdwxehrk4DPG5xKZhYBZyHqpZ3lnGSAfZ9arRkOsMviNv7W/AW90z2DjkNY2nAAAAABJRU5ErkJggg==\",\n        \"metadata\": {\n          \"cropped\": false\n        },\n        \"mime_type\": \"image/png\"\n      }\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "bbb56ede-5748-40a5-b0fb-e2844cb448e1",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Standard Growth",
+			"item": [
+				{
+					"name": "1. Request verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "23bb9146-b7f9-4b7f-be83-5407e63ec428",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"postman+{{$timestamp}}@evidentid.com\",\n\t\"summary\": \"Growth Background Check Test\",\n\t\"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n\t\"userAuthenticationType\": \"blindtrust\",\n\t\"attributesRequested\": [\n\t\t{\n\t\t\t\"attributeType\": \"background.criminal.profile.standard_growth\"\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e334590d-af05-4469-9579-7b69294acb89",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"inputs\": [\n  \t{\n      \"type\": \"consent.fcra.authorized\",\n      \"value\": true\n    },\n    {\n      \"type\": \"consent.fcra.requested_free_copy_state\",\n      \"value\": true\n    },\n    {\n      \"type\": \"consent.fcra.reviewed_disclosure\",\n      \"value\": true\n    },\n    {\n      \"type\": \"core.ssn\",\n      \"value\": \"123456789\"\n    },\n    {\n      \"type\": \"core.dateofbirth\",\n      \"value\": {\n        \"$objectType\": \"date\",\n        \"year\": \"1970\",\n        \"day\": \"01\",\n        \"month\": \"01\"\n      }\n    },\n    {\n      \"type\": \"core.fullname\",\n      \"value\": {\n        \"$objectType\": \"Name\",\n\t\t\"prefix\": null,\n        \"first\": \"Joe\",\n        \"middle\": null,\n        \"last\": \"Tester\",\n        \"suffix\": null\n      }\n    },\n    {\n      \"type\": \"identity_assurance.document_verification.americas.us.document_type\",\n      \"value\": {\n        \"country\": \"US\",\n        \"id_type\": \"drivers_license\"\n      }\n    },\n    {\n      \"type\": \"identity_assurance.document_verification.americas.us.drivers_license.image.back\",\n      \"value\": {\n        \"$objectType\": \"BinaryData\",\n        \"data\": \"iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7AQMAAABuCW08AAAABlBMVEUAAAD///+l2Z/dAAAAAnRSTlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAFwSURBVEiJ1dUxbsQgEAXQQRTu7AsgcQ06rmQuYK8vsL4SHddA8gVwR2Ht5DvyJqsUYSKlSJC1sl4B4xlmlvjLov8MhWjyufekIikZ7HyMzu6J5oR3GUQzEd89hURBDKM7QuT1JzAnoo6UHPgICYnIL6E3APkIyZzPZ4Ia8L7szdH8WoZvoZChzswRidxWGXC1xWfy25pykMEeMznLcXu4PAgh8YPwim0OJYRIk8Ov3lmzENLGiXrcO7rK0AROZkCJ4lacGaSgb53pPc7MSgalM4HtHnGmXWTA5/XhW0c9PTdtwV4JDcQVWb++tg3RrmcrMCqsZFDo6M+s04B4ZYDa3r1Gm9Iz0jZUM+LAtO3p2qMNaVuSXqJe6/NKNQF9gG7gPJJeZIBVOmQdYZogg7Ozq8XHqWSUDDA/JkwpDINrDwFgsJ2H2/IRugRwfdwxehrk4DPG5xKZhYBZyHqpZ3lnGSAfZ9arRkOsMviNv7W/AW90z2DjkNY2nAAAAABJRU5ErkJggg==\",\n        \"metadata\": {\n          \"cropped\": false\n        },\n        \"mime_type\": \"image/png\"\n      }\n    },\n    {\n      \"type\": \"identity_assurance.document_verification.americas.us.drivers_license.image.front\",\n      \"value\": {\n        \"$objectType\": \"BinaryData\",\n        \"data\": \"iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7AQMAAABuCW08AAAABlBMVEUAAAD///+l2Z/dAAAAAnRSTlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAFwSURBVEiJ1dUxbsQgEAXQQRTu7AsgcQ06rmQuYK8vsL4SHddA8gVwR2Ht5DvyJqsUYSKlSJC1sl4B4xlmlvjLov8MhWjyufekIikZ7HyMzu6J5oR3GUQzEd89hURBDKM7QuT1JzAnoo6UHPgICYnIL6E3APkIyZzPZ4Ia8L7szdH8WoZvoZChzswRidxWGXC1xWfy25pykMEeMznLcXu4PAgh8YPwim0OJYRIk8Ov3lmzENLGiXrcO7rK0AROZkCJ4lacGaSgb53pPc7MSgalM4HtHnGmXWTA5/XhW0c9PTdtwV4JDcQVWb++tg3RrmcrMCqsZFDo6M+s04B4ZYDa3r1Gm9Iz0jZUM+LAtO3p2qMNaVuSXqJe6/NKNQF9gG7gPJJeZIBVOmQdYZogg7Ozq8XHqWSUDDA/JkwpDINrDwFgsJ2H2/IRugRwfdwxehrk4DPG5xKZhYBZyHqpZ3lnGSAfZ9arRkOsMviNv7W/AW90z2DjkNY2nAAAAABJRU5ErkJggg==\",\n        \"metadata\": {\n          \"cropped\": false\n        },\n        \"mime_type\": \"image/png\"\n      }\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "bbb56ede-5748-40a5-b0fb-e2844cb448e1",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Standard Premium",
+			"item": [
+				{
+					"name": "1. Request verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ce12ddf-9a33-4044-aecf-64598d32c05a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "23bb9146-b7f9-4b7f-be83-5407e63ec428",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"postman+{{$timestamp}}@evidentid.com\",\n\t\"summary\": \"Growth Background Check Test\",\n\t\"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n\t\"userAuthenticationType\": \"blindtrust\",\n\t\"attributesRequested\": [\n\t\t{\n\t\t\t\"attributeType\": \"background.criminal.profile.standard_premium\"\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e334590d-af05-4469-9579-7b69294acb89",
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"inputs\": [\n  \t{\n      \"type\": \"consent.fcra.authorized\",\n      \"value\": true\n    },\n    {\n      \"type\": \"consent.fcra.requested_free_copy_state\",\n      \"value\": true\n    },\n    {\n      \"type\": \"consent.fcra.reviewed_disclosure\",\n      \"value\": true\n    },\n    {\n      \"type\": \"core.ssn\",\n      \"value\": \"123456789\"\n    },\n    {\n      \"type\": \"core.dateofbirth\",\n      \"value\": {\n        \"$objectType\": \"date\",\n        \"year\": \"1970\",\n        \"day\": \"01\",\n        \"month\": \"01\"\n      }\n    },\n    {\n      \"type\": \"core.fullname\",\n      \"value\": {\n        \"$objectType\": \"Name\",\n\t\t\"prefix\": null,\n        \"first\": \"Joe\",\n        \"middle\": null,\n        \"last\": \"Tester\",\n        \"suffix\": null\n      }\n    },\n    {\n      \"type\": \"identity_assurance.document_verification.americas.us.document_type\",\n      \"value\": {\n        \"country\": \"US\",\n        \"id_type\": \"drivers_license\"\n      }\n    },\n    {\n      \"type\": \"identity_assurance.document_verification.americas.us.drivers_license.image.back\",\n      \"value\": {\n        \"$objectType\": \"BinaryData\",\n        \"data\": \"iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7AQMAAABuCW08AAAABlBMVEUAAAD///+l2Z/dAAAAAnRSTlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAFwSURBVEiJ1dUxbsQgEAXQQRTu7AsgcQ06rmQuYK8vsL4SHddA8gVwR2Ht5DvyJqsUYSKlSJC1sl4B4xlmlvjLov8MhWjyufekIikZ7HyMzu6J5oR3GUQzEd89hURBDKM7QuT1JzAnoo6UHPgICYnIL6E3APkIyZzPZ4Ia8L7szdH8WoZvoZChzswRidxWGXC1xWfy25pykMEeMznLcXu4PAgh8YPwim0OJYRIk8Ov3lmzENLGiXrcO7rK0AROZkCJ4lacGaSgb53pPc7MSgalM4HtHnGmXWTA5/XhW0c9PTdtwV4JDcQVWb++tg3RrmcrMCqsZFDo6M+s04B4ZYDa3r1Gm9Iz0jZUM+LAtO3p2qMNaVuSXqJe6/NKNQF9gG7gPJJeZIBVOmQdYZogg7Ozq8XHqWSUDDA/JkwpDINrDwFgsJ2H2/IRugRwfdwxehrk4DPG5xKZhYBZyHqpZ3lnGSAfZ9arRkOsMviNv7W/AW90z2DjkNY2nAAAAABJRU5ErkJggg==\",\n        \"metadata\": {\n          \"cropped\": false\n        },\n        \"mime_type\": \"image/png\"\n      }\n    },\n    {\n      \"type\": \"identity_assurance.document_verification.americas.us.drivers_license.image.front\",\n      \"value\": {\n        \"$objectType\": \"BinaryData\",\n        \"data\": \"iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7AQMAAABuCW08AAAABlBMVEUAAAD///+l2Z/dAAAAAnRSTlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAFwSURBVEiJ1dUxbsQgEAXQQRTu7AsgcQ06rmQuYK8vsL4SHddA8gVwR2Ht5DvyJqsUYSKlSJC1sl4B4xlmlvjLov8MhWjyufekIikZ7HyMzu6J5oR3GUQzEd89hURBDKM7QuT1JzAnoo6UHPgICYnIL6E3APkIyZzPZ4Ia8L7szdH8WoZvoZChzswRidxWGXC1xWfy25pykMEeMznLcXu4PAgh8YPwim0OJYRIk8Ov3lmzENLGiXrcO7rK0AROZkCJ4lacGaSgb53pPc7MSgalM4HtHnGmXWTA5/XhW0c9PTdtwV4JDcQVWb++tg3RrmcrMCqsZFDo6M+s04B4ZYDa3r1Gm9Iz0jZUM+LAtO3p2qMNaVuSXqJe6/NKNQF9gG7gPJJeZIBVOmQdYZogg7Ozq8XHqWSUDDA/JkwpDINrDwFgsJ2H2/IRugRwfdwxehrk4DPG5xKZhYBZyHqpZ3lnGSAfZ9arRkOsMviNv7W/AW90z2DjkNY2nAAAAABJRU5ErkJggg==\",\n        \"metadata\": {\n          \"cropped\": false\n        },\n        \"mime_type\": \"image/png\"\n      }\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "bbb56ede-5748-40a5-b0fb-e2844cb448e1",
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
