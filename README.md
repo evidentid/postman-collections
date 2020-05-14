@@ -1,6 +1,6 @@
 # Using Postman collections
 
-To use EvidentID's Postman collections follow these steps:
+To use EvidentID's Postman collections follow these steps and/or watch our quick [video tutorial](https://youtu.be/5qoz2emcgho)
 
 1. Download [Postman](https://www.postman.com/) and install on your machine
 2. Download the Evident Postman collections and environment files from this repository (\*.postman_collection.json and \*.postman_environment.json)
