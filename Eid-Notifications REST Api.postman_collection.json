@@ -1,0 +1,434 @@
+{
+	"info": {
+		"_postman_id": "b690ec24-232f-4721-a5ca-dd3a4a225c4a",
+		"name": "Eid-Notifications REST Api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "POST notification INT (invalid, 401 - wrong Api Key)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "rueouropwjer2478023jfrw",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"message\": {\n        \"to\": [\n            {\n                \"email\": \"eidwebtesting@gmail.com\"\n            }\n        ],\n        \"subject\": \"Test notification\",\n        \"from_email\": \"evident@evidentid.com\",\n        \"from_name\": \"Evident\",\n        \"headers\": {\n            \"Reply-To\": \"Evident <evident@evidentid.com>\"\n        },\n        \"text\": \"this is test mail body\",\n        \"global_merge_vars\": [\n            {\n                \"name\": \"IDO_FIRST_NAME\",\n                \"content\": \"IDO_FIRST_NAME\"\n            },\n            {\n                \"name\": \"RP_WORDMARK\",\n                \"content\": \"RP_WORDMARK\"\n            },\n            {\n                \"name\": \"RP_BRANDCOLOR\",\n                \"content\": \"RP_BRANDCOLOR\"\n            }\n        ]\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://notifications.api.int.evidentid.com/api/v1/notifications",
+					"protocol": "https",
+					"host": [
+						"notifications",
+						"api",
+						"int",
+						"evidentid",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"notifications"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST notification INT (invalid, 400- wrong input format)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"message\": {\n        \"to\": [\n            {\n                \"emailxx\": \"eidwebtesting@gmail.com\"\n            }\n        ],\n        \"subject\": \"Test notification\",\n        \"from_email\": \"evident@evidentid.com\",\n        \"from_name\": \"Evident\",\n        \"headers\": {\n            \"Reply-To\": \"Evident <evident@evidentid.com>\"\n        },\n        \"text\": \"this is test mail body\",\n        \"global_merge_vars\": [\n            {\n                \"name\": \"IDO_FIRST_NAME\",\n                \"content\": \"IDO_FIRST_NAME\"\n            },\n            {\n                \"name\": \"RP_WORDMARK\",\n                \"content\": \"RP_WORDMARK\"\n            },\n            {\n                \"name\": \"RP_BRANDCOLOR\",\n                \"content\": \"RP_BRANDCOLOR\"\n            }\n        ]\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://notifications.api.int.evidentid.com/api/v1/notifications",
+					"protocol": "https",
+					"host": [
+						"notifications",
+						"api",
+						"int",
+						"evidentid",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"notifications"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST notification INT (valid, no template)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"message\": {\n        \"to\": [\n            {\n                \"email\": \"eidwebtesting@gmail.com\"\n            }\n        ],\n        \"subject\": \"Test notification\",\n        \"from_email\": \"evident@evidentid.com\",\n        \"from_name\": \"Evident\",\n        \"headers\": {\n            \"Reply-To\": \"Evident <evident@evidentid.com>\"\n        },\n        \"text\": \"this is test mail body\",\n        \"global_merge_vars\": [\n            {\n                \"name\": \"IDO_FIRST_NAME\",\n                \"content\": \"IDO_FIRST_NAME\"\n            },\n            {\n                \"name\": \"RP_WORDMARK\",\n                \"content\": \"RP_WORDMARK\"\n            },\n            {\n                \"name\": \"RP_BRANDCOLOR\",\n                \"content\": \"RP_BRANDCOLOR\"\n            }\n        ]\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://notifications.api.int.evidentid.com/api/v1/notifications",
+					"protocol": "https",
+					"host": [
+						"notifications",
+						"api",
+						"int",
+						"evidentid",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"notifications"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST notification INT (valid, using template)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"message\": {\n        \"subject\" : \"Notification API Test with template\",\n        \"text\" : \"Notification REST has requested attributes from idowner e4d057b9f7aa4f56b07aab1b01b941705760ab94befa34c836c3f6b53a22b048@behave.blindtrust.thirdparty.idowner.evidentid.com\\nDescription: General Liability Insurance Check\",\n        \"to\" : [ \n            {\n                \"type\" : \"to\",\n                \"email\" : \"eidwebtesting+eid-notification-rest@gmail.com\"\n            }\n        ],\n        \"headers\" : {\n            \"Reply-To\" : \"Notification REST <no-reply@evidentid.com>\"\n        },\n        \"from_email\" : \"no-reply@evidentid.com\",\n        \"from_name\" : \"Notification REST\",\n        \"global_merge_vars\" : [ \n            {\n                \"name\" : \"BAR_BELOW_WORDMARK_COLOR\",\n                \"content\" : \"#778EA1\"\n            }, \n            {\n                \"name\" : \"BOX_BEHIND_BUTTON_BG_COLOR\",\n                \"content\" : \"#ECEDEE\"\n            }, \n            {\n                \"name\" : \"BOX_BEHIND_BUTTON_FG_COLOR\",\n                \"content\" : \"#2D3E50\"\n            }, \n            {\n                \"name\" : \"BUTTON_BG_COLOR\",\n                \"content\" : \"#778EA1\"\n            }, \n            {\n                \"name\" : \"BUTTON_FG_COLOR\",\n                \"content\" : \"#fff\"\n            }, \n            {\n                \"name\" : \"IDOWEB_URL\",\n                \"content\" : \"https://idoweb.api.int.evidentid.com/api/v1/auth?auth_token=eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiIvQz1VUy9TVD1HZW9yZ2lhL0w9QWxwaGFyZXR0YS9PPUV2aWRlbnRJRC1EZXZlbG9wbWVudC9PVT1yZWx5aW5ncGFydHkvQ049YmVoYXZlL2VtYWlsQWRkcmVzcz1zdXBwb3J0QGV2aWRlbnRpZC5jb20iLCJhdWQiOiJiZWhhdmUuYmxpbmR0cnVzdC50aGlyZHBhcnR5Lmlkb3duZXIuZXZpZGVudGlkLmNvbSIsInN1YiI6ImU0ZDA1N2I5ZjdhYTRmNTZiMDdhYWIxYjAxYjk0MTcwNTc2MGFiOTRiZWZhMzRjODM2YzNmNmI1M2EyMmIwNDhAYmVoYXZlLmJsaW5kdHJ1c3QudGhpcmRwYXJ0eS5pZG93bmVyLmV2aWRlbnRpZC5jb20iLCJpYXQiOjE2Mjc5NzM1MjgsImV4cCI6MTYzMDM5MjcyOCwiZW1haWwiOiJlaWR3ZWJ0ZXN0aW5nK3Rlc3QtMjYwLmE4YTI5ZTljLWRmNmQtNDI4OS1iMDFkLWU1NTg2OGIzYmQ2MEBnbWFpbC5jb20iLCJub25jZSI6IlhBSERPamRyaHJVS1lEeHRPaXktbFFqLVdFVl9kcHZmIiwicmVxdWVzdElkIjoiMjIyODYyNzAtYjM5OC00YTI0LTlkYjAtZTJkYzFlNTllM2JiIn0.lF-we9154LQI5GQaTZdIcBktVtPX77NLGIDwhe23DFmP18Vwpg577rBDY5sI5tAVv4eSt1wANjJHA-zg_UhhhKMlzmXCiH25MhwBkVXJdfzEy_XVot5T4B8waj8EXExfVPTLBM94RQM6hDRDwf4RvBdEz7rtgTiEk-7k8IHmVvDJSSQ9EvsBcrsTUktyGNZV1KxalcPoseOrm43bv0L7buWrsL4Atyp2qIW5eojKu-Hy2FMLzoRRBXAY7CwGycQ6rh0LpfQH_3wA5LKOWmm_Cdx3YH3CwH5k5PQPFMV8bzh92DX8NeFvvdQxX1_11nbqDunHj0HamxqAo0hOJ6dKLapA3dKC_TnW32pL6s7sDMkO2EPv3RXC2L_mk4WvPTu7MD2eMH9D_SVzJFAf62eZV6aW4fDOOaNkD7WUE6vKNj6EVLpTQzrGjkcpWYKPiii1yWEw-aL01JoIG2bZ7VAuQZF7Gqycp1V-QCfqSNvJ2VjAopyCVf7j_NrKlIB9ifQxQhC95ywg8LJfOZBJmm6ay-ZapBmLhKvY_KnhvtL1U4ZE5-JBhcFuqpYkfOQud-AJDwAHhYUYFWSFMAokcwCBcZZtgdMiX_Xh_eK78dWOmF415lQjTsde0vv0TOLs4xZiuwmrZ2QBreqFmhy-opgepQLuFQm9DfvPs4OrJwIKQSU\"\n            }, \n            {\n                \"name\" : \"REQUEST_DESCRIPTION\",\n                \"content\" : \"Do you have a general liability policy?  (via Fountain Integration)\"\n            }, \n            {\n                \"name\" : \"REQUEST_SUMMARY\",\n                \"content\" : \"General Liability Insurance Check\"\n            }, \n            {\n                \"name\" : \"RP_NAME\",\n                \"content\" : \"Behave\"\n            }, \n            {\n                \"name\" : \"RP_WORDMARK\",\n                \"content\" : \"https://privacy.evidentid.com/cust-icons/wordmark-evidentid.png\"\n            }\n        ],\n        \"merge_language\" : \"handlebars\"\n    },\n    \"message_id\" : null,\n    \"idowner_id\" : \"e4d057b9f7aa4f56b07aab1b01b941705760ab94befa34c836c3f6b53a22b048@behave.blindtrust.thirdparty.idowner.evidentid.com\",\n    \"rp_name\" : null,\n    \"rpr_id\" : \"22286270-b398-4a24-9db0-e2dc1e59e3bb\",\n    \"template_name\" : \"IDO - RP Request Web Submit\",\n    \"skip_deduplication_check\": true\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://notifications.api.int.evidentid.com/api/v1/notifications",
+					"protocol": "https",
+					"host": [
+						"notifications",
+						"api",
+						"int",
+						"evidentid",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"notifications"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST mandrill INT (invalid, 401 -wrong HMAC signature)",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Mandrill-Signature",
+						"value": "4B7hJTabcqO9Ctkmu45aRsO3snxE=",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"mandrill_events\": \"[{\\\"event\\\":\\\"reject\\\",\\\"msg\\\":{\\\"ts\\\":1365109999,\\\"subject\\\":\\\"This an example webhook message\\\",\\\"email\\\":\\\"example.webhook@mandrillapp.com\\\",\\\"sender\\\":\\\"example.sender@mandrillapp.com\\\",\\\"tags\\\":[\\\"webhook-example\\\"],\\\"opens\\\":[],\\\"clicks\\\":[],\\\"state\\\":\\\"rejected\\\",\\\"metadata\\\":{\\\"user_id\\\":111},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa\\\",\\\"_version\\\":\\\"exampleaaaaaaaaaaaaaaa\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa\\\",\\\"ts\\\":1571076151},{\\\"event\\\":\\\"reject\\\",\\\"msg\\\":{\\\"ts\\\":1365109999,\\\"subject\\\":\\\"This an example webhook message\\\",\\\"sender\\\":\\\"example.sender@mandrillapp.com\\\",\\\"tags\\\":[\\\"webhook-example\\\"],\\\"opens\\\":[],\\\"clicks\\\":[],\\\"state\\\":\\\"rejected\\\",\\\"metadata\\\":{\\\"user_id\\\":111},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa1\\\",\\\"_version\\\":\\\"exampleaaaaaaaaaaaaaaa\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa1\\\",\\\"ts\\\":1571076151}]\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://notifications.api.int.evidentid.com/webhooks/mandrill",
+					"protocol": "https",
+					"host": [
+						"notifications",
+						"api",
+						"int",
+						"evidentid",
+						"com"
+					],
+					"path": [
+						"webhooks",
+						"mandrill"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST mandrill INT (invalid, empty message)",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Mandrill-Signature",
+						"value": "7/3tiriDuZKxJWheiRv2frg1LoY=",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://notifications.api.int.evidentid.com/webhooks/mandrill",
+					"protocol": "https",
+					"host": [
+						"notifications",
+						"api",
+						"int",
+						"evidentid",
+						"com"
+					],
+					"path": [
+						"webhooks",
+						"mandrill"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST mandrill INT (invalid, missing \"email\" attr in 2nd message - put on failures queue)",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Mandrill-Signature",
+						"value": "4B7hJT6aqO9Ctkmu45aRsO3snxE=",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"mandrill_events\": \"[{\\\"event\\\":\\\"reject\\\",\\\"msg\\\":{\\\"ts\\\":1365109999,\\\"subject\\\":\\\"This an example webhook message\\\",\\\"email\\\":\\\"example.webhook@mandrillapp.com\\\",\\\"sender\\\":\\\"example.sender@mandrillapp.com\\\",\\\"tags\\\":[\\\"webhook-example\\\"],\\\"opens\\\":[],\\\"clicks\\\":[],\\\"state\\\":\\\"rejected\\\",\\\"metadata\\\":{\\\"user_id\\\":111},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa\\\",\\\"_version\\\":\\\"exampleaaaaaaaaaaaaaaa\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa\\\",\\\"ts\\\":1571076151},{\\\"event\\\":\\\"reject\\\",\\\"msg\\\":{\\\"ts\\\":1365109999,\\\"subject\\\":\\\"This an example webhook message\\\",\\\"sender\\\":\\\"example.sender@mandrillapp.com\\\",\\\"tags\\\":[\\\"webhook-example\\\"],\\\"opens\\\":[],\\\"clicks\\\":[],\\\"state\\\":\\\"rejected\\\",\\\"metadata\\\":{\\\"user_id\\\":111},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa1\\\",\\\"_version\\\":\\\"exampleaaaaaaaaaaaaaaa\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa1\\\",\\\"ts\\\":1571076151}]\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://notifications.api.int.evidentid.com/webhooks/mandrill",
+					"protocol": "https",
+					"host": [
+						"notifications",
+						"api",
+						"int",
+						"evidentid",
+						"com"
+					],
+					"path": [
+						"webhooks",
+						"mandrill"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST mandrill INT (valid, no env metadata - defaults to INT)",
+			"request": {
+				"auth": {
+					"type": "digest",
+					"digest": [
+						{
+							"key": "algorithm",
+							"value": "MD5",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Mandrill-Signature",
+						"value": "pZWSnR1zRQ/uJNPj7dPhzLPB0CI=",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"mandrill_events\": \"[{\\\"event\\\":\\\"reject\\\",\\\"msg\\\":{\\\"ts\\\":1365109999,\\\"subject\\\":\\\"This an example webhook message\\\",\\\"email\\\":\\\"example.webhook@mandrillapp.com\\\",\\\"sender\\\":\\\"example.sender@mandrillapp.com\\\",\\\"tags\\\":[\\\"webhook-example\\\"],\\\"opens\\\":[],\\\"clicks\\\":[],\\\"state\\\":\\\"rejected\\\",\\\"metadata\\\":{\\\"user_id\\\":111},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa\\\",\\\"_version\\\":\\\"exampleaaaaaaaaaaaaaaa\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa\\\",\\\"ts\\\":1571076151},{\\\"event\\\":\\\"reject\\\",\\\"msg\\\":{\\\"ts\\\":1365109999,\\\"subject\\\":\\\"This an example webhook message\\\",\\\"email\\\":\\\"example.webhook@mandrillapp.com\\\",\\\"sender\\\":\\\"example.sender@mandrillapp.com\\\",\\\"tags\\\":[\\\"webhook-example\\\"],\\\"opens\\\":[],\\\"clicks\\\":[],\\\"state\\\":\\\"rejected\\\",\\\"metadata\\\":{\\\"user_id\\\":111},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa1\\\",\\\"_version\\\":\\\"exampleaaaaaaaaaaaaaaa\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa1\\\",\\\"ts\\\":1571076151}]\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://notifications.api.int.evidentid.com/webhooks/mandrill",
+					"protocol": "https",
+					"host": [
+						"notifications",
+						"api",
+						"int",
+						"evidentid",
+						"com"
+					],
+					"path": [
+						"webhooks",
+						"mandrill"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST mandrill INT (valid, env metadata - 1 INT message, 1 DEV message - forward one to DEV)",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Mandrill-Signature",
+						"value": "WukfQ8CN3iMvMSJ2KrDXD242TP4=",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"mandrill_events\": \"[{\\\"event\\\":\\\"reject\\\",\\\"msg\\\":{\\\"ts\\\":1365109999,\\\"subject\\\":\\\"This an example webhook message\\\",\\\"email\\\":\\\"example.webhook@mandrillapp.com\\\",\\\"sender\\\":\\\"example.sender@mandrillapp.com\\\",\\\"tags\\\":[\\\"webhook-example\\\"],\\\"opens\\\":[],\\\"clicks\\\":[],\\\"state\\\":\\\"rejected\\\",\\\"metadata\\\":{\\\"user_id\\\":111,\\\"e\\\":\\\"d\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa\\\",\\\"_version\\\":\\\"exampleaaaaaaaaaaaaaaa\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa\\\",\\\"ts\\\":1571076151},{\\\"event\\\":\\\"reject\\\",\\\"msg\\\":{\\\"ts\\\":1365109999,\\\"subject\\\":\\\"This an example webhook message\\\",\\\"email\\\":\\\"example.webhook@mandrillapp.com\\\",\\\"sender\\\":\\\"example.sender@mandrillapp.com\\\",\\\"tags\\\":[\\\"webhook-example\\\"],\\\"opens\\\":[],\\\"clicks\\\":[],\\\"state\\\":\\\"rejected\\\",\\\"metadata\\\":{\\\"user_id\\\":111,\\\"e\\\":\\\"i\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa1\\\",\\\"_version\\\":\\\"exampleaaaaaaaaaaaaaaa\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa1\\\",\\\"ts\\\":1571076151}]\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://notifications.api.int.evidentid.com/webhooks/mandrill",
+					"protocol": "https",
+					"host": [
+						"notifications",
+						"api",
+						"int",
+						"evidentid",
+						"com"
+					],
+					"path": [
+						"webhooks",
+						"mandrill"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST mandrill INT (valid, forward to non-existing env - put on failures queue)",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Mandrill-Signature",
+						"value": "efLhlK+gNawvDfRTLiQNp2jE2RI=",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"mandrill_events\": \"[{\\\"event\\\":\\\"reject\\\",\\\"msg\\\":{\\\"ts\\\":1365109999,\\\"subject\\\":\\\"This an example webhook message\\\",\\\"email\\\":\\\"example.webhook@mandrillapp.com\\\",\\\"sender\\\":\\\"example.sender@mandrillapp.com\\\",\\\"tags\\\":[\\\"webhook-example\\\"],\\\"opens\\\":[],\\\"clicks\\\":[],\\\"state\\\":\\\"rejected\\\",\\\"metadata\\\":{\\\"user_id\\\":111,\\\"e\\\":\\\"d\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa\\\",\\\"_version\\\":\\\"exampleaaaaaaaaaaaaaaa\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa\\\",\\\"ts\\\":1571076151},{\\\"event\\\":\\\"reject\\\",\\\"msg\\\":{\\\"ts\\\":1365109999,\\\"subject\\\":\\\"This an example webhook message\\\",\\\"email\\\":\\\"example.webhook@mandrillapp.com\\\",\\\"sender\\\":\\\"example.sender@mandrillapp.com\\\",\\\"tags\\\":[\\\"webhook-example\\\"],\\\"opens\\\":[],\\\"clicks\\\":[],\\\"state\\\":\\\"rejected\\\",\\\"metadata\\\":{\\\"user_id\\\":111,\\\"e\\\":\\\"other\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa1\\\",\\\"_version\\\":\\\"exampleaaaaaaaaaaaaaaa\\\"},\\\"_id\\\":\\\"exampleaaaaaaaaaaaaaaaaaaaaaaaaa1\\\",\\\"ts\\\":1571076151}]\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://notifications.api.int.evidentid.com/webhooks/mandrill",
+					"protocol": "https",
+					"host": [
+						"notifications",
+						"api",
+						"int",
+						"evidentid",
+						"com"
+					],
+					"path": [
+						"webhooks",
+						"mandrill"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{notificationsApiKey}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
