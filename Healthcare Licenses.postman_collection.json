@@ -1186,6 +1186,422 @@
 			"protocolProfileBehavior": {}
 		},
 		{
+			"name": "Esthetican (VALID)",
+			"item": [
+				{
+					"name": "1. Request license verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"postman+{{$timestamp}}@evidentid.com\",\n\t\"summary\": \"Esthetican License Verification Test\",\n\t\"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n\t\"userAuthenticationType\": \"blindtrust\",\n\t\"attributesRequested\": [\n\t\t{\n\t\t\t\"attributeType\": \"credentialing.license.professional.us.healthcare.esthetician.licenses_list\"\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit license on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"https://evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"inputs\": [\n\t\t{\n\t\t\t\"type\": \"core.fullname\",\n\t\t\t\"value\": \n\t\t\t{\n\t\t\t\t\"$objectType\": \"Name\",\n\t\t\t\t\"first\": \"TestLicense\",\n\t\t\t\t\"last\": \"M\",\n\t\t\t\t\"middle\": \"Smith\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"credentialing.license.professional.us.healthcare.esthetician.input_licenses_list\",\n\t\t\t\"value\": {\n\t\t\t\t\"$objectType\": \"usEstheticianLicenseList\",\n\t\t\t\t\"licenses\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"XY1234567\",\n\t\t\t\t\t\t\"licenseState\": \"MO\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"4321AB\",\n\t\t\t\t\t\t\"licenseState\": \"IL\"\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Cosmetologist (VALID)",
+			"item": [
+				{
+					"name": "1. Request license verification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var responseJson = JSON.parse(responseBody)",
+									"pm.environment.set(\"userIdentityToken\", responseJson.userIdentityToken);",
+									"pm.environment.set(\"requestId\", responseJson.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }",
+									"pm.environment.set(\"userIdentityToken\", null);",
+									"pm.environment.set(\"requestId\", null);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"postman+{{$timestamp}}@evidentid.com\",\n\t\"summary\": \"Cosmetologist License Verification Test\",\n\t\"description\": \"This is a test of the Evident ID API. The description goes into the email body\",\n\t\"userAuthenticationType\": \"blindtrust\",\n\t\"attributesRequested\": [\n\t\t{\n\t\t\t\"attributeType\": \"credentialing.license.professional.us.healthcare.cosmetologist.licenses_list\"\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Submit license on behalf of the user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const cookieJar = pm.cookies.jar()",
+									"cookieJar.unset(\"https://evidentid.com\", \"session\", function (error) {",
+									"    if(error) {",
+									"      console.log('Error Deleting Session Cookie: ', error)",
+									"    }",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userIdentityToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"inputs\": [\n\t\t{\n\t\t\t\"type\": \"core.fullname\",\n\t\t\t\"value\": \n\t\t\t{\n\t\t\t\t\"$objectType\": \"Name\",\n\t\t\t\t\"first\": \"TestLicense\",\n\t\t\t\t\"last\": \"M\",\n\t\t\t\t\"middle\": \"Smith\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"credentialing.license.professional.us.healthcare.cosmetologist.input_licenses_list\",\n\t\t\t\"value\": {\n\t\t\t\t\"$objectType\": \"usCosmetologistLicenseList\",\n\t\t\t\t\"licenses\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"XY1234567\",\n\t\t\t\t\t\t\"licenseState\": \"MO\"\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\t\"licenseId\": \"4321AB\",\n\t\t\t\t\t\t\"licenseState\": \"IL\"\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hostSubmitAPI}}/api/v1/requests",
+							"host": [
+								"{{hostSubmitAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Retrive the results",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"if (pm.environment.get(\"apiKey\")==\"<add your apiKey>\") { throw new Error(\"Configure your accountName and apiKey in Postman Environments\"); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{accountName}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{hostVerifyAPI}}/api/v1/verify/requests/{{requestId}}",
+							"host": [
+								"{{hostVerifyAPI}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"verify",
+								"requests",
+								"{{requestId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
 			"name": "Physician Assistant",
 			"item": [
 				{
